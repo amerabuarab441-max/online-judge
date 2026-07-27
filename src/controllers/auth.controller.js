@@ -1,15 +1,25 @@
 const authService = require("../services/auth.service");
 
 exports.register = async (req, res) => {
-  try {
-    const user = await authService.registerUser(req.body);
+    try {
+        const user = await authService.register(req.body);
 
-    res.status(201).json(user);
-  } catch (error) {
-    console.error(error);
+        res.json({
+            message: "Register successful",
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                createdAt: user.createdAt
+            }
+        });
 
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
-  }
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
 };

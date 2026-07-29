@@ -23,3 +23,49 @@ exports.createProblem = async (req, res) => {
 
     }
 };
+exports.getProblems = async (req, res) => {
+
+    try {
+
+        const problems = await problemService.getProblems();
+
+        res.json(problems);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+
+};
+
+
+
+exports.getProblemById = async (req, res) => {
+
+    try {
+
+        const problem = await problemService.getProblemById(
+            req.params.id
+        );
+
+
+        res.json(problem);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(404).json({
+            message: error.message
+        });
+
+    }
+
+};

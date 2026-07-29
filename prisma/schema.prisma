@@ -13,12 +13,90 @@ enum Role {
   CONTESTANT
 }
 
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  role      Role     @default(CONTESTANT)
+  id       String @id @default(uuid())
+  username String @unique
+  email    String @unique
+  password String
+  role     Role   @default(CONTESTANT)
+
+  problems    Problem[]
+  submissions Submission[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Problem {
+  id            String       @id @default(uuid())
+
+  title         String
+  description   String
+
+  timeLimit     Int
+  memoryLimit   Int
+
+  difficulty    Difficulty
+
+  isPublished   Boolean      @default(false)
+
+  authorId      String
+  author        User         @relation(fields: [authorId], references: [id])
+
+  testCases     TestCase[]
+  submissions   Submission[]
+
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model TestCase {
+  id String @id @default(uuid())
+
+  input  String
+  output String
+
+  isHidden Boolean @default(true)
+
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Submission {
+  id String @id @default(uuid())
+
+  sourceCode String
+
+  language String
+
+  status SubmissionStatus @default(PENDING)
+
+  executionTime Float?
+
+  memoryUsed Int?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+
+  createdAt DateTime @default(now())
 }

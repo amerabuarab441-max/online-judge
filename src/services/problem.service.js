@@ -55,3 +55,30 @@ exports.getProblemById = async (id) => {
 
     return problem;
 };
+exports.updateProblem = async (id, data) => {
+
+    const problem = await prisma.problem.update({
+        where: {
+            id
+        },
+        data: {
+            title: data.title,
+            description: data.description,
+            timeLimit: data.timeLimit,
+            memoryLimit: data.memoryLimit,
+            difficulty: data.difficulty
+        }
+    });
+
+    return problem;
+};
+exports.deleteProblem = async (id) => {
+
+    const problem = await prisma.problem.delete({
+        where: {
+            id
+        }
+    });
+
+    return problem;
+};

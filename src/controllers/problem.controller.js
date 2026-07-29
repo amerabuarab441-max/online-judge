@@ -69,3 +69,51 @@ exports.getProblemById = async (req, res) => {
     }
 
 };
+exports.updateProblem = async (req, res) => {
+
+    try {
+
+        const problem = await problemService.updateProblem(
+            req.params.id,
+            req.body
+        );
+
+        res.json({
+            message: "Problem updated successfully",
+            problem
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(400).json({
+            message: error.message
+        });
+
+    }
+};
+exports.deleteProblem = async (req, res) => {
+
+    try {
+
+        await problemService.deleteProblem(
+            req.params.id
+        );
+
+        res.json({
+            message: "Problem deleted successfully"
+        });
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(400).json({
+            message: error.message
+        });
+
+    }
+};

@@ -13,6 +13,19 @@ router.post(
     problemController.createProblem
 );
 
+router.put(
+    "/:id",
+    authMiddleware,
+    authorize("ADMIN", "PROBLEM_SETTER"),
+    problemController.updateProblem
+);
+
+router.delete(
+    "/:id",
+    authMiddleware,
+    authorize("ADMIN", "PROBLEM_SETTER"),
+    problemController.deleteProblem
+);
 
 router.get(
     "/",

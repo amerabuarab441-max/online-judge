@@ -1,5 +1,5 @@
 const prisma = require("../config/prisma");
-
+const executionService = require("./execution.service");
 
 exports.createSubmission = async (userId, data) => {
 
@@ -32,6 +32,40 @@ exports.createSubmission = async (userId, data) => {
         }
     });
 
+    const testCase = await prisma.testCase.findFirst({
+    where: {
+        problemId,
+    },
+});
+
+    const result = await executionService.executeCpp(
+    submission.id,
+    sourceCode,
+    testCase.input
+);
+
+
+const status =
+    result.trim() === testCase.output.trim()
+        ? "ACCEPTED"
+        : "WRONG_ANSWER";
+
+
+await prisma.submission.update({
+    where: {
+        id: submission.id
+    },
+    data: {
+        status
+    }
+});
+
+
+return await prisma.submission.findUnique({
+    where: {
+        id: submission.id
+    }
+});
 
     return submission;
 };

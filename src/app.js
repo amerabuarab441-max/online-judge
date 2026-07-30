@@ -4,6 +4,7 @@ const prisma = require("./config/prisma");
 const authRoutes = require("./routes/auth.routes");
 const problemRoutes = require("./routes/problem.routes");
 const testcaseRoutes = require("./routes/testcase.routes");
+const submissionRoutes = require("./routes/submission.routes");
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/problems", problemRoutes);
 app.use("/testcases", testcaseRoutes);
+app.use("/submissions", submissionRoutes);
 
 // Home Route
 app.get("/", (req, res) => {

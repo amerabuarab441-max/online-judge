@@ -24,6 +24,7 @@ enum SubmissionStatus {
   ACCEPTED
   WRONG_ANSWER
   TIME_LIMIT_EXCEEDED
+  MEMORY_LIMIT_EXCEEDED
   RUNTIME_ERROR
   COMPILATION_ERROR
 }
@@ -34,6 +35,10 @@ model User {
   email    String @unique
   password String
   role     Role   @default(CONTESTANT)
+  rating   Int    @default(1500)
+
+  contests       Contest[]
+  participations ContestParticipant[]
 
   problems    Problem[]
   submissions Submission[]
@@ -43,21 +48,26 @@ model User {
 }
 
 model Problem {
-  id          String     @id @default(uuid())
-  title       String
-  description String
-  timeLimit   Int
-  memoryLimit Int
-  difficulty  Difficulty
-
+  id            String     @id @default(uuid())
+  title         String
+  titleAr       String?    // ✨ العنوان بالعربية
+  description   String
+  descriptionAr String?    // ✨ الوصف بالعربية
+  difficulty    Difficulty
+  timeLimit     Int
+  memoryLimit   Int
+  
   authorId String
   author   User   @relation(fields: [authorId], references: [id])
 
-  testCases   TestCase[]
-  submissions Submission[]
+  testCases       TestCase[]
+  submissions     Submission[]
+  ContestProblems ContestProblem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([authorId])
 }
 
 model TestCase {
@@ -67,29 +77,127 @@ model TestCase {
   isHidden Boolean @default(true)
 
   problemId String
-  problem   Problem @relation(fields: [problemId], references: [id])
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  results SubmissionResult[]
 
   createdAt DateTime @default(now())
+
+  @@index([problemId])
 }
 
 model Submission {
   id String @id @default(uuid())
 
   sourceCode String
-
-  language String
+  language   String
 
   status SubmissionStatus @default(PENDING)
 
-  executionTime Float?
+  contestId String?
+  contest   Contest? @relation(fields: [contestId], references: [id], onDelete: SetNull)
 
-  memoryUsed Int?
+  executionTime Int?
+  memoryUsed    Int?
+  judgedAt      DateTime?
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   problemId String
-  problem   Problem @relation(fields: [problemId], references: [id])
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  results SubmissionResult[]
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([problemId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model SubmissionResult {
+  id String @id @default(uuid())
+
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  testCaseId String
+  testCase   TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  status SubmissionStatus
+
+  executionTime Int?
+  memoryUsed    Int?
+
+  actualOutput String?
+  errorMessage String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([submissionId, testCaseId])
+  @@index([submissionId])
+  @@index([testCaseId])
+  @@index([status])
+}
+
+model Contest {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  startTime       DateTime
+  endTime         DateTime
+  isPublic        Boolean  @default(true)
+  ratingsCalculated Boolean @default(false)
+  
+  creatorId   String
+  creator     User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  problems      ContestProblem[]
+  participants  ContestParticipant[]
+  submissions   Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startTime, endTime])
+}
+
+model ContestProblem {
+  // يربط بين المسابقة والمشكلة (لأن المسابقة تحتوي على مشاكل محددة)
+  id        String  @id @default(uuid())
+  contestId String
+  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  
+  index     Int     // ترتيب المشكلة في المسابقة (مثلاً: A, B, C)
+
+  createdAt DateTime @default(now())
+
+  @@unique([contestId, problemId]) // منع تكرار نفس المشكلة في نفس المسابقة
+  @@index([contestId])
+}
+
+model ContestParticipant {
+  id        String   @id @default(uuid())
+  contestId String
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  score     Int      @default(0)
+  penalty   Int      @default(0)
+  joinedAt  DateTime @default(now())
+  
+    isVirtual        Boolean   @default(false)
+  virtualStartTime DateTime?
+  
+  ratingChange     Int?
+
+  @@unique([contestId, userId])
+  @@index([contestId])
 }

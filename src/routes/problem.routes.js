@@ -13,6 +13,17 @@ router.post(
     problemController.createProblem
 );
 
+router.get(
+    "/:id",
+    problemController.getProblemById
+);
+
+// ترجمة المشكلة آلياً إلى العربية (متاح للجميع)
+router.post(
+    "/:id/translate",
+    problemController.translateProblem
+);
+
 router.put(
     "/:id",
     authMiddleware,
@@ -31,12 +42,5 @@ router.get(
     "/",
     problemController.getProblems
 );
-
-
-router.get(
-    "/:id",
-    problemController.getProblemById
-);
-
 
 module.exports = router;

@@ -42,55 +42,46 @@ const jwt = require("jsonwebtoken");
 
 
 exports.login = async (data) => {
-
-    const { email, password } = data;
-
+    const { email, password, rememberMe = false } = data;
 
     // Find user by email
     const user = await prisma.user.findUnique({
-        where: {
-            email
-        }
+        where: { email }
     });
-
 
     if (!user) {
         throw new Error("Invalid email or password");
     }
 
-
     // Compare password
-    const isPasswordValid = await bcrypt.compare(
-        password,
-        user.password
-    );
-
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
         throw new Error("Invalid email or password");
     }
 
+    // Create JWT token with configurable expiration
+    // If rememberMe: 30 days, otherwise: 1 day
+    const expiresIn = rememberMe ? "30d" : "1d";
 
-    // Create JWT token
     const token = jwt.sign(
         {
             id: user.id,
             role: user.role
         },
         process.env.JWT_SECRET,
-        {
-            expiresIn: "1d"
-        }
+        { expiresIn }
     );
-
 
     return {
         token,
+        expiresIn,
         user: {
             id: user.id,
             username: user.username,
             email: user.email,
-            role: user.role
+            role: user.role,
+            rating: user.rating
         }
     };
 };

@@ -1,22 +1,27 @@
-const authorize = (...roles) => {
+function authorize(...allowedRoles) {
 
     return (req, res, next) => {
 
         if (!req.user) {
+
             return res.status(401).json({
-                message: "Unauthorized"
+                message: "Authentication required"
             });
+
         }
 
-        if (!roles.includes(req.user.role)) {
+        if (!allowedRoles.includes(req.user.role)) {
+
             return res.status(403).json({
-                message: "Access denied"
+                message: "You do not have permission to perform this action"
             });
+
         }
 
         next();
+
     };
 
-};
+}
 
 module.exports = authorize;

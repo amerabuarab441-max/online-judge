@@ -95,25 +95,57 @@ exports.updateProblem = async (req, res) => {
     }
 };
 exports.deleteProblem = async (req, res) => {
-
     try {
-
-        await problemService.deleteProblem(
-            req.params.id
+        const result = await problemService.deleteProblem(
+            req.params.id,
+            req.user.id,
+            req.user.role
         );
 
-        res.json({
-            message: "Problem deleted successfully"
-        });
-
-
+        res.json(result);
     } catch (error) {
-
         console.error(error);
-
         res.status(400).json({
             message: error.message
         });
+    }
+};
 
+exports.updateProblem = async (req, res) => {
+    try {
+        const problem = await problemService.updateProblem(
+            req.params.id,
+            req.body,
+            req.user.id,
+            req.user.role
+        );
+
+        res.json({
+            message: "Problem updated successfully",
+            problem
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(400).json({
+            message: error.message
+        });
+    }
+};
+
+exports.translateProblem = async (req, res) => {
+    try {
+        const result = await problemService.translateProblem(req.params.id);
+
+        res.json({
+            message: result.cached 
+                ? "Translation retrieved successfully" 
+                : "Problem translated successfully",
+            ...result
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: error.message
+        });
     }
 };

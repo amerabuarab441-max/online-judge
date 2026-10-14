@@ -117,7 +117,7 @@ online-judge-platform/
 
 ## 👥 Authors
 
-- **Your Name** - [GitHub Profile](https://github.com/amerabuarab441-max)
+- **Amer Abu Arab** - [GitHub Profile](https://github.com/amerabuarab441-max)
 
 ---
 
